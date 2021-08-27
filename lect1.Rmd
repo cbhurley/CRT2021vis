@@ -144,6 +144,8 @@ all the variables. You could do this manually, one variable at a time, but this 
 dataReporter::makeDataReport(bike,replace=TRUE)
 ```
 
+You will find the results at dataReporter_bike.pdf.
+
 One thing to note from the results, is that `weathersit' has a zero count for the fourth level.
 We will drop this.
 
