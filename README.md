@@ -11,7 +11,9 @@ Participants require computers with the software R and the related interface (ID
 
 The lecture materials are available at 
 
-[Lecture 1] (http://htmlpreview.github.io/?https://github.com/cbhurley/CRT2021vis/blob/master/lect1.html)
+My favorite search engine is [Duck Duck Go](https://duckduckgo.com)
+
+Lecture 1 notes are [here](http://htmlpreview.github.io/?https://github.com/cbhurley/CRT2021vis/blob/master/lect1.html)
 
 
 
