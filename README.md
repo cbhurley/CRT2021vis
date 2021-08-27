@@ -1,4 +1,3 @@
-These are the lecture materials
 
 ## Science Foundation Ireland Centre for Research Training in Foundations of Data Science 
 
@@ -12,7 +11,9 @@ Participants require computers with the software R and the related interface (ID
 
 The lecture materials are available at 
 
-<http://htmlpreview.github.io/?https://github.com/cbhurley/CRT2021vis/blob/master/lect1.html>
+[Lecture 1] (http://htmlpreview.github.io/?https://github.com/cbhurley/CRT2021vis/blob/master/lect1.html)
+
+
 
 <http://htmlpreview.github.io/?https://github.com/cbhurley/CRT2021vis/blob/master/lect2.html>
 
