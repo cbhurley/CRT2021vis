@@ -319,7 +319,7 @@ we have considered are `x`, `y`, `fill` and `color`.
 Here are some other aesthetics (figure from Wilke book)
 
 ```{r, echo=F, eval=T, out.width="75%", fig.align='center'}
-knitr::include_graphics("aes.png")
+knitr::include_graphics("figs/aes.png")
 ```
 
 - shape and line type aesthetics are for categorical data (ie factors)

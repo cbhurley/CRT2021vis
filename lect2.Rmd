@@ -307,12 +307,109 @@ gg_miss_upset(m[,-c(22,20)])
 
 Check out the visualisations in `naniar` for more options, eg the vignette at <https://cran.r-project.org/web/packages/naniar/vignettes/naniar-visualisation.html>
 
+
+## Titanic case study
+
+There were 2201 people aboard the Titanic when it sank in 1912.
+A summary of the people on board and whether they survived or not is given in the Titanic dataset.
+
+Here are some images as it left its last port of call, Cobh.
+
+```{r, echo=F, eval=T,  out.width="30%",fig.align='center', fig.show='hold'}
+knitr::include_graphics(c("figs/titanic.png"))
+knitr::include_graphics(c("figs/cobh.png"))
+```
+
+
+Can we figure out from this data which category of passenger had the highest chance of survival?
+
+This case study looks at 4 categorical variables simultaneously:
+- Survival (yes or no), 
+- class (first, second, third, crew,)
+- gender (male or female) and 
+- age (child or adult).
+
+
+First we look at the number of survivors by class
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+#Titanic  # a 4d array....
+tit <- as.data.frame(Titanic)
+head(tit)
+tit<- tit[c(17:32,1:16),]
+
+ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col() 
+```
+
+and then the survival rates by class
+
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col(position="fill") 
+```
+
+- There is a big difference in Survival rates across the classes.
+- First class passengers have the highest chance of survival, crew members the lowest. 
+
+
+We can bring in gender with `facet_wrap`
+
+```{r,  fig.width=5.5, fig.height=3, fig.align="center"}
+ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col(position="fill") + 
+  facet_wrap( ~ Sex) + ylab("Rate")
+```
+
+- Third class females do worse than crew females (46% versus 87%), and
+third class males do worse than crew males (17% versus 22%), although when gender is ignored the situation is
+reversed.
+
+- This apparent paradox (Simpson's paradox) occurs because the vast majority of crew members are male.
+
+- The overall 3rd class survival rate of 25% is an average of 46% and 17%, but as there are 2.6 times
+more men than women in 3rd class 17% gets more weight.
+
+- The overall crew survival rate of 24% is an average of 87% and 22\%, but as there are 37 times
+more men than women in crew class 87% gets very little weight.
+
+Finally, bringing in age
+```{r,  fig.width=5.5, fig.height=4.5, fig.align="center"}
+ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col(position="fill") + 
+  facet_wrap( ~ Age+ Sex) + ylab("Rate")
+```
+
+We can get some simplification by showing the survival rate, that is omit the red sections.
+
+
+```{r,  fig.width=4.5, fig.height=4.5, fig.align="center"}
+titR <- 
+tit %>%  group_by(Class, Sex,Age) %>%
+summarise(died=Freq[2], survived=Freq[1], rate=survived/sum(Freq))
+titR
+
+ggplot(data = titR, aes(x = Class, y = rate)) +
+  geom_col(fill="lightblue") + 
+  facet_wrap( ~ Age+ Sex) 
+
+```
+
+## Practice 4
+
+Explore the survival rates for the data `lusitania.csv` on <https://github.com/cbhurley/CRT2021vis>
+This is a tabulated version of the data, in the same format as `tit`. The complete dataset
+is available on Kaggle.
+
+You can find out more about the shipwreck <https://en.wikipedia.org/wiki/RMS_Lusitania>
+
+
+
 ## Recommended book
 
 "The plot", Jean Hanff Korelitz
 
 ```{r, echo=F, eval=T, out.width="25%", fig.align='center'}
-knitr::include_graphics("plot.png")
+knitr::include_graphics("figs/plot.png")
 ```
 
 ```{r, echo=FALSE, eval=FALSE, purl=FALSE}
