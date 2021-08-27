@@ -9,9 +9,7 @@ Data visualisation is core to meaningful data presentation, and plays a central 
 
 Participants require computers with the software R and the related interface (IDE) RStudio. These should be installed before the lecture.
 
-The lecture materials are available at 
 
-My favorite search engine is [Duck Duck Go](https://duckduckgo.com)
 
 [Lecture 1](http://htmlpreview.github.io/?https://github.com/cbhurley/CRT2021vis/blob/master/lect1.html)
 
