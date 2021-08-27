@@ -1,0 +1,515 @@
+---
+title: "Data visualisation in R"
+author: "Catherine Hurley"
+date: "7/9/2021"
+output:
+  html_document:
+    theme: readable
+    code_download: true
+    toc: true
+    toc_depth: 2
+    number_sections: true
+editor_options:
+  chunk_output_type: console
+---
+
+<!-- <style type="text/css"> -->
+<!--   body, td { -->
+<!--     font-size: 14pt; -->
+<!--   } -->
+<!-- code.r{ -->
+<!--   font-size: 12pt; -->
+<!-- } -->
+<!-- pre { -->
+<!--   font-size: 12pt -->
+<!-- } -->
+<!-- </style> -->
+
+
+
+
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=F)
+```
+# Part I: Introduction to ggplot2
+
+## Preparation
+
+You will find the material for this lecture at <https://github.com/cbhurley/CRT2021vis>
+
+First install these packages
+
+```{r, eval=F}
+install.packages(c("tidyverse", "dataReporter", "timetk","palmerpenguins"))
+```
+
+and load with
+
+```{r}
+library(tidyverse)
+library(timetk) # for the data
+library(palmerpenguins) # more data
+```
+
+
+
+## Why visualise data?
+
+We can summarise data with numeric summaries like mean, standard deviation and correlation.
+Why do we need more?
+
+```{r, anscombe, echo=F,purl=FALSE}
+summary(anscombe[,1:4])
+summary(anscombe[,5:8])
+##-- now some "magic" to do the 4 regressions in a loop:
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  ## or   ff[[2]] <- as.name(paste0("y", i))
+  ##      ff[[3]] <- as.name(paste0("x", i))
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)
+  # print(anova(lmi))
+}
+
+## See how close they are (numerically!)
+# sapply(mods, coef)
+# lapply(mods, function(fm) coef(summary(fm)))
+
+## Now, do what you should have done in the first place: PLOTS
+op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, col = "red", pch = 21, bg = "orange", cex = 1.2,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "blue")
+  cc <- cor(anscombe[[paste0(c("x",i), collapse="")]], anscombe[[paste0(c("y",i), collapse="")]])
+  title(paste0("cor=", round(cc,4), collapse=""))
+}
+mtext("Anscombe's 4 Regression data sets", outer = TRUE, cex = 1.5)
+par(op)
+
+```
+
+
+## The data
+
+We will use a bike sharing dataset, from the UCI machine learning archive <https://archive.ics.uci.edu/ml/machine-learning-databases/00275/>
+
+There is daily data and hourly, we will use the hourly.
+
+
+The data is available in the R package timetk.
+
+```{r, getdata}
+
+glimpse(bike_sharing_daily)
+```
+
+This dataset contains the daily count of rental bike transactions between years 2011 and 2012 in Capital bikeshare system with the corresponding weather and seasonal information.
+
+The two temperature variables temp and atemp (feeling temperature), both are normalised.
+
+
+Some of these variables should be factors, so we will fix this up first.
+
+```{r, fixdata}
+bike <- bike_sharing_daily
+bike$season <- c("Winter","Spring", "Summer","Fall")[bike$season]
+bike$season <- factor(bike$season, levels = c("Winter","Spring", "Summer","Fall"))  
+
+bike$mnth <- factor(bike$mnth)
+
+bike$holiday <- factor(c("No","Yes")[bike$holiday+1])
+bike$workingday <- factor(c("No","Yes")[bike$workingday+1])
+
+bike$yr <- factor(c("2011","2012")[bike$yr+1])
+
+bike$weathersit <- c("clear", "cloudy", "lightP", "heavyP")[bike$weathersit]
+bike$weathersit <- factor(bike$weathersit, levels= c("clear", "cloudy", "lightP", "heavyP"))
+
+glimpse(bike)
+```
+
+A good way to check the data for oddities is to use a package that will do a plot, and summary of 
+all the variables. You could do this manually, one variable at a time, but this saves work:
+
+```{r, report, eval=F}
+dataReporter::makeDataReport(bike,replace=TRUE)
+```
+
+One thing to note from the results, is that `weathersit' has a zero count for the fourth level.
+We will drop this.
+
+```{r}
+table(bike$weathersit)
+bike <- droplevels(bike)
+table(bike$weathersit)
+```
+
+## ggplot2
+
+In R, you can use base R (barplot, hist, plot). Here we will use ggplot2 functions.
+
+ggplot2 is an R package authored by Hadley Wickham for elegant graphics in R.
+Click on this link \url{https://ggplot2.tidyverse.org} for lots of information.
+
+
+Also check out he primer at
+\url{https://rstudio.cloud/learn/primers/3}
+
+You will find more references at the end of this document.
+
+
+## Basic plots
+
+### Histogram {-}
+Our report used one plot per variable, barplots for factors and histograms for numeric variables.
+
+
+
+
+```{r, fig.width=3.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, 
+       mapping= aes(x=cnt)) + geom_histogram()
+ggplot(data=bike, mapping= aes(x=cnt)) + 
+  geom_histogram(fill="lightblue", color="navy")
+```
+
+- Here mapping describes how the data is mapped to aesthetics.
+
+- Aesthetics are what you see on the plot. Here that `cnt` goes on the x axis.
+
+- The geom is what is drawn, here a histogram.
+
+- In the second variant, the fill colour and outline colour for the bars is specified.
+
+- You could use another variable for the fill or color:
+
+```{r, fig.width=4.5, fig.height=3.5, fig.align="center"}
+ggplot(data=bike, mapping= aes(x=cnt, fill=yr)) + 
+  geom_histogram(color="black")
+```
+
+- You are seeing here for each bar, the count for 2011 and 2012. 
+
+### Barplot {-}
+
+For the barplot, the x variable is a factor, or something that can be interpreted as a factor.
+
+```{r,  fig.width=3.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, mapping= aes(x=weathersit)) + 
+  geom_bar(fill="lightblue", color="navy")
+```
+
+You can add color to this
+
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, mapping= aes(x=weathersit, fill=yr)) + 
+  geom_bar( )
+```
+
+and switch to proportions with
+
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, mapping= aes(x=weathersit, fill=yr)) + 
+  geom_bar( position="fill")
+```
+
+`geom_col` is like `geom_bar`, except you have a y variable.
+The plot below shows the number of bikes rented for each month, and in the second
+variant we colour by year.
+
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+
+ggplot(data=bike, mapping= aes(x=mnth, y=cnt)) + 
+  geom_col(color="lightblue", fill="lightblue")
+
+
+ggplot(data=bike, mapping= aes(x=mnth, y=cnt, fill=yr)) + 
+  geom_col()
+
+```
+
+
+### A scatterplot {-}
+
+The scatterplot is for two numeric variables, and you use `geom_point`
+
+```{r,  fig.width=3.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(x=temp, y=cnt)) + geom_point()
+```
+
+We can easily bring a third  variable for the point colour, and a fourth for shape:
+
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(x=temp, y=cnt, color=yr)) + 
+  geom_point()
+
+ggplot(data=bike, aes(x=temp, y=cnt, color=yr, shape=season)) + 
+  geom_point()
+
+
+```
+The plot with shape and colour works better when there is more separation between the froups.
+
+In the plot below, weekday is a numeric variable so it is mapped to shades of blue.
+This variable is better represented as a factor, which changes the ggplot.
+
+
+```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(x=temp, y=cnt, color=weekday)) + 
+  geom_point()
+
+bike$weekday <- factor(bike$weekday)
+
+ggplot(data=bike, aes(x=temp, y=cnt, color=weekday)) + 
+  geom_point()
+
+```
+Would we expect the relationship between cnt and temp to change with weekday?
+
+
+
+
+### A time plot
+
+```{r,  fig.width=5.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(x=dteday, y=cnt)) + 
+  geom_line()
+
+```
+We could use `geom_point` here but `geom_line` connects the dots.
+
+Note that `dteday` is a `date` variable in the dataset, which is interpreted correctly for the plot.
+
+```{r,  fig.width=5.5, fig.height=3, fig.align="center"}
+library(lubridate)
+ggplot(data=bike, aes(x=yday(dteday), y=cnt, color=yr)) + 
+  geom_line()
+```
+
+## Practice 1
+
+Using the `penguins` dataset, make these two plots
+```{r, fig.width=4.5, fig.height=3, fig.align="center", echo=F}
+
+ggplot(penguins, aes(x = island, fill = species)) +
+  geom_bar() 
+
+
+ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point(aes(color = species,
+                 shape = species)) 
+```
+
+## Anatomy of a ggplot
+
+We have seen that **aesthetics** are linked to variables in a dataset. Aesthetics
+we have considered are `x`, `y`, `fill` and `color`.
+
+Here are some other aesthetics (figure from Wilke book)
+
+```{r, echo=F, eval=T, out.width="75%", fig.align='center'}
+knitr::include_graphics("aes.png")
+```
+
+- shape and line type aesthetics are for categorical data (ie factors)
+- others can represent factors or numeric variables
+
+**scales** map data values into aesthetics. Eg use `scale_x_log10()` to log the x coordinates.
+Default is `scale_x_continuous`. Adjust this to change axes, for example
+
+
+```{r,  fig.width=6.5, fig.height=3, fig.align="center"}
+
+ggplot(data=bike, aes(x=yday(dteday), y=cnt, color=yr)) + 
+  geom_line()+
+  scale_x_continuous(breaks=cumsum(c(1,31,28,31,30,31,30,31,31,30,31,30)),
+                     labels=month.abb[1:12])+
+  xlab("Date")
+```
+
+**layers**  components of the plot are added in layers, using `+`
+
+**legend** refers to the color index on the right. You will get legends for fill, linetype and other aesthetics.
+
+**themes** refer to non-data components, the background, title, font and so on. Work on this to pretty-up the plot.
+
+**facets** are important, this is a way to split up a plot by a factor. It increases the number of dimensions that can
+be plotted.
+
+```{r,  fig.width=6.5, fig.height=5.5, fig.align="center"}
+
+ggplot(data=bike, aes(x=temp, y=cnt, color=yr)) + 
+  geom_point()+
+  facet_wrap(~ season)
+```
+
+
+## More on layers
+
+In ggplot the idea is that you build up to the desired plot bit by bit.
+
+Going back to the first scatterplot, we can add a smooth, and or a regression line:
+
+```{r, fig.width=3.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(x=temp, y=cnt)) + 
+  geom_point()+
+  geom_smooth()
+
+p <- ggplot(data=bike, aes(x=temp, y=cnt)) + 
+     geom_point()
+
+p + geom_smooth(method="lm", se=FALSE)
+```
+
+By default `geom_smooth` uses loess, for 1000 observations or less, and a gam otherwise.
+
+The interesting thing is if you have colors or groups, the `geom_smooth` will respect that:
+
+```{r, fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(x=temp, y=cnt, color=yr)) + 
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+```
+
+## More on facets
+
+More than one variable can be added tp the facet wrap. For example, you could use
+`facet_wrap(~ season+ yr)`,
+or even better `facet_grid`
+
+```{r,  fig.width=9, fig.height=4, fig.align="center"}
+
+ggplot(data=bike, aes(x=temp, y=cnt, color=yr)) + 
+  geom_point()+
+  facet_grid( workingday ~ season)
+```
+
+And if we add smooths or other fits, these will respect the groups for the colors and facets.
+
+
+```{r, fig.width=9, fig.height=4, fig.align="center"}
+ggplot(data=bike, aes(x=temp, y=cnt, color=yr)) + 
+  geom_point()+
+  facet_grid( workingday ~ season)+
+  geom_smooth(se=F)
+```
+
+Suppose you want to fit regression lines instead, then simply use `method=lm` in the `geom_smooth`.
+
+This will be essentially fitting the model to the interaction of `season` and `yr` with `temp`.
+
+To compare the fit with and without interaction, we create the fit and
+added the fitted values to the dataset, and then use `geom_line`.
+
+```{r,  fig.width=9, fig.height=4, fig.align="center"}
+fit <- lm(cnt ~ temp+season+yr, data=bike)
+bike %>% 
+  mutate(fit = fitted(fit)) %>%
+  ggplot(aes(x=temp, y=cnt, color=yr)) + 
+  geom_point(size=1)+  # points smaller
+  facet_grid( workingday ~ season)+
+  geom_smooth(method=lm, se=F)+
+  geom_line(aes(y=fit), linetype="twodash", size=1.5)
+```
+
+The fit without interaction does poorly for summer.
+
+
+
+
+
+## Practice 2
+
+Using the penguins dataset, make these two plots
+
+
+```{r, fig.width=9.5, fig.height=3, fig.align="center", echo=F}
+
+ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point(aes(color = sex))+
+  facet_wrap(~ species)
+
+
+ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm, color=sex)) +
+  geom_point()+
+  facet_wrap(~ species)+
+  geom_smooth(method="lm", se=FALSE)+
+  scale_colour_discrete(na.translate = FALSE)
+```
+
+Hint: there are a few ways to get rid of the NA in the `sex` legend, one is to use
+`scale_colour_discrete(na.translate = FALSE)`
+
+After that you can check out many more examples with this data at
+<https://allisonhorst.github.io/palmerpenguins/articles/intro.html>
+
+
+## Alternatives to histogram
+
+### Density plot {-}
+
+We can fit a density estimate to one numeric variable, just replace `geom_histogram`
+with `geom_density`
+
+Here we compare the histogram and density
+
+```{r, fig.width=3.5, fig.height=3, fig.align="center", eval=F}
+ggplot(data=bike, aes(x=cnt)) + 
+  geom_density(color="red")+
+  geom_histogram(aes(y=after_stat(density)),fill="lightblue", color="navy", alpha=.5)
+```
+
+If you use a fill aesthetic for the density you get
+```{r, fig.width=4.5, fig.height=3, fig.align="center", eval=F}
+ggplot(data=bike, aes(x=cnt, fill=yr)) + 
+  geom_density(alpha=.5)
+```
+`alpha` gives some transparency.
+ 
+### Boxplots {-}
+A boxplot in ggplot needs a y and x variable. 
+
+```{r, fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(y=cnt,x=season)) + 
+  geom_boxplot(varwidth=TRUE) # width of box proportional to sqrt of nobs
+```
+
+If you do not need an x variable use:
+
+```{r, fig.width=3.5, fig.height=3, fig.align="center", eval=F}
+ggplot(data=bike, aes(y=cnt), x=0) + # any number will do
+  geom_boxplot()  
+```
+
+
+Violin plots are a variant using a density folded-over
+
+```{r, fig.width=4.5, fig.height=3, fig.align="center"}
+ggplot(data=bike, aes(y=cnt,x=season)) + 
+  geom_violin(fill="lightblue")
+```
+
+
+## References
+
+Data visualization a practical introduction by Kieran Healy <https://socviz.co>
+
+<!-- https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/ -->
+
+Fundamentals of Data Visualization by Claus Wilke <https://clauswilke.com/dataviz/> (no R) 
+
+
+```{r, echo=FALSE, eval=FALSE, purl=FALSE}
+knitr::purl("lect1.Rmd")
+```
+
