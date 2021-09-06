@@ -2,6 +2,10 @@
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=F)
 
 
+## ---- echo=F, eval=T, out.width="25%", fig.align='center'------------------------------------------------------------------
+knitr::include_graphics("figs/wainer.png")
+
+
 ## ---- eval=F---------------------------------------------------------------------------------------------------------------
 ## install.packages(c("tidyverse", "dataReporter", "timetk","palmerpenguins"))
 
@@ -12,10 +16,6 @@ library(timetk) # for the data
 library(palmerpenguins) # more data
 
 
-
-
-## ---- echo=F, eval=T, out.width="25%", fig.align='center'------------------------------------------------------------------
-knitr::include_graphics("figs/wainer.png")
 
 
 ## ---- getdata--------------------------------------------------------------------------------------------------------------
