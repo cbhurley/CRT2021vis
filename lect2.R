@@ -93,29 +93,35 @@ ggpairs(bike, mapping = aes(color = yr),
  
 
 
-## ---- fig.width=6, fig.height=3, fig.align="center"------------------------------------------------------------------------
+## ---- eval=F---------------------------------------------------------------------------------------------------------------
+## # install.packages("devtools")
+## remotes::install_github("yaweige/ggpcp", build_vignettes = TRUE)
+
+
+## ---- fig.width=6, fig.height=3, fig.align="center", eval=T, echo=F--------------------------------------------------------
 
 s <- sample(nrow(bike),20)
 ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
            groupColumn = "yr",
            showPoints=TRUE,
-           alphaLines=0)
+           alphaLines=0,scale="uniminmax")
 
 ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
            groupColumn = "yr",
            showPoints=TRUE,
-           alphaLines=1)
+           alphaLines=1,scale="uniminmax")
 
 ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "yr")
+           groupColumn = "yr",scale="uniminmax")
 
 
 ## ---- fig.width=6, fig.height=3, fig.align="center"------------------------------------------------------------------------
+library(ggpcp)
+ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)))
 
-ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "yr", scale="uniminmax")
-ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "yr", scale="globalminmax")
+
+## ---- fig.width=6, fig.height=3, fig.align="center"------------------------------------------------------------------------
+ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)), method="raw")
 
 
 
@@ -125,40 +131,47 @@ x <- rnorm(100)
 y <- x+ .3*rnorm(100)
 z <- -y+ .1*rnorm(100)
 w <- -z+ .5*rnorm(100)
-ggparcoord(data.frame(x,y,z,w), scale="uniminmax")
+ggplot(data.frame(x,y,z,w))+ geom_pcp(aes(vars=vars(everything())))
 
 
 ## ----fig.width=6, fig.height=3, fig.align="center"-------------------------------------------------------------------------
-ggparcoord(bike, columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "workingday",
-           alphaLines=.4)
+ggplot(bike, aes(color=workingday)) + geom_pcp(aes(vars=vars(casual,registered, cnt)), alpha=.4)
+
 
 
 ## ----  fig.width=5, fig.height=4, fig.align="center"-----------------------------------------------------------------------
 ggplot(data=bike, aes(x=casual, y=registered, color=workingday)) + geom_point()
 
 
-## ---- fig.width=6, fig.height=5, fig.align="center", echo=F----------------------------------------------------------------
-ggpairs(na.omit(penguins), mapping = aes(color = species),
-            columns=c(3:7),
-  lower = list(continuous =  wrap("smooth", method="lm", se=F, alpha=.5)),
-  diag = list(continuous = wrap("densityDiag", alpha=0.5 )))
+## ----fig.width=6, fig.height=3, fig.align="center"-------------------------------------------------------------------------
+ggplot(bike, aes(vars=vars( workingday,casual,registered, cnt), color=workingday)) + 
+  geom_pcp(alpha=.4)
+
+ggplot(bike, aes(vars=vars( workingday,casual,registered, cnt), color=workingday)) + 
+   geom_pcp_box(boxwidth = 0.1, fill="grey70")+
+    geom_pcp(alpha=.4,boxwidth = 0.1)+
+   geom_pcp_text(boxwidth = 0.1)
+
+
+
+
+## ---- fig.width=6, fig.height=5, fig.align="center", echo=F, eval=F--------------------------------------------------------
+## ggpairs(na.omit(penguins), mapping = aes(color = species),
+##             columns=c(3:6),
+##   lower = list(continuous =  wrap("smooth", method="lm", se=F, alpha=.5)),
+##   diag = list(continuous = wrap("densityDiag", alpha=0.5 )))
 
 
 ## ----fig.width=6, fig.height=3, fig.align="center", echo=F, eval=F---------------------------------------------------------
 ## 
+## ggplot(penguins, aes(vars=vars(bill_length_mm:body_mass_g), color=species))+
+##         geom_pcp(alpha=.4)
 ## 
-## ggparcoord(penguins, columns=which(sapply(penguins, is.numeric)),
-##            groupColumn = "species",
-##            alphaLines=.4)
 ## 
-## ggparcoord(penguins, columns=which(sapply(penguins, is.numeric)),
-##            groupColumn = "island",
-##            alphaLines=.4)
-## 
-## ggparcoord(penguins, columns=which(sapply(penguins, is.numeric)),
-##            groupColumn = "sex",
-##            alphaLines=.4)
+## ggplot(penguins, aes(vars=vars(species, island, starts_with("body")), color=species))+
+##   geom_pcp_box(boxwidth = 0.1, fill="grey70")+
+##   geom_pcp(alpha=.4,boxwidth = 0.1)+
+##   geom_pcp_text(boxwidth = 0.1)
 ## 
 
 
@@ -171,6 +184,52 @@ vis_miss(m)
 gg_miss_upset(m[,-c(22,20)])
 
 
-## ---- echo=F, eval=T, out.width="25%", fig.align='center'------------------------------------------------------------------
-knitr::include_graphics("plot.png")
+## ---- echo=F, eval=T,  out.width="30%",fig.align='center', fig.show='hold'-------------------------------------------------
+knitr::include_graphics(c("figs/titanic.png"))
+knitr::include_graphics(c("figs/cobh.png"))
+
+
+## ----  fig.width=4.5, fig.height=3, fig.align="center"---------------------------------------------------------------------
+#titanicanic  # a 4d array....
+titanic <- as.data.frame(Titanic)
+head(titanic)
+titanic<- titanic[c(17:32,1:16),]
+
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col() 
+
+
+## ----  fig.width=4.5, fig.height=3, fig.align="center"---------------------------------------------------------------------
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col(position="fill") 
+
+
+## ----  fig.width=5.5, fig.height=3, fig.align="center"---------------------------------------------------------------------
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col(position="fill") + 
+  facet_wrap( ~ Sex) + ylab("Rate")
+
+
+## ----  fig.width=5.5, fig.height=4.5, fig.align="center"-------------------------------------------------------------------
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
+  geom_col(position="fill") + 
+  facet_wrap( ~ Age+ Sex) + ylab("Rate")
+
+
+## ----  fig.width=4.5, fig.height=4.5, fig.align="center"-------------------------------------------------------------------
+titanicR <- 
+titanic %>%  group_by(Class, Sex,Age) %>%
+summarise(died=Freq[2], survived=Freq[1], rate=survived/sum(Freq))
+titanicR
+
+ggplot(data = titanicR, aes(x = Class, y = rate)) +
+  geom_col(fill="lightblue") + 
+  facet_wrap( ~ Age+ Sex) 
+
+
+  
+
+
+## ---- echo=F, eval=T,  out.width="50%",fig.align='center', fig.show='hold'-------------------------------------------------
+knitr::include_graphics(c("figs/pcp.png"))
 

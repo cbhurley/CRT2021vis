@@ -179,39 +179,54 @@ ggpairs(bike, mapping = aes(color = yr),
 
 ## Parallel coordinates
 
-Construction:
+These can be constructed with function `ggparcoord` from GGally.
 
-```{r, fig.width=6, fig.height=3, fig.align="center"}
+But, a newer package called `ggpcp` is better.
+
+```{r, eval=F}
+# install.packages("devtools")
+remotes::install_github("yaweige/ggpcp", build_vignettes = TRUE)
+```
+
+Construction: with a sample of 20 bike observations
+
+
+
+
+```{r, fig.width=6, fig.height=3, fig.align="center", eval=T, echo=F}
 
 s <- sample(nrow(bike),20)
 ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
            groupColumn = "yr",
            showPoints=TRUE,
-           alphaLines=0)
+           alphaLines=0,scale="uniminmax")
 
 ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
            groupColumn = "yr",
            showPoints=TRUE,
-           alphaLines=1)
+           alphaLines=1,scale="uniminmax")
 
 ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "yr")
+           groupColumn = "yr",scale="uniminmax")
 ```
 
-By default, all variables are scaled to mean zero and standard deviation 1, individually.
-Variables that are positively correlated will have parallel line segments, here registered and cnt.
-
-Other scaling options are:
+This is how you create the parallel coordinate plot in `ggpcp`
 
 ```{r, fig.width=6, fig.height=3, fig.align="center"}
+library(ggpcp)
+ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)))
+```
 
-ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "yr", scale="uniminmax")
-ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "yr", scale="globalminmax")
+Here, all variables are scaled to the unit interval individually.
+Variables that are positively correlated will have parallel line segments, here registered and cnt.
+
+Other scaling options are available eg
+
+```{r, fig.width=6, fig.height=3, fig.align="center"}
+ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)), method="raw")
 
 ```
-In globalminmax, no scaling is done. Here you can see that most users per day are registered.
+In raw, no scaling is done. Here you can see that most users per day are registered.
 
 To see what certain patterns look like in a parallel coordinate plot, let
 us look at some fake data
@@ -222,7 +237,7 @@ x <- rnorm(100)
 y <- x+ .3*rnorm(100)
 z <- -y+ .1*rnorm(100)
 w <- -z+ .5*rnorm(100)
-ggparcoord(data.frame(x,y,z,w), scale="uniminmax")
+ggplot(data.frame(x,y,z,w))+ geom_pcp(aes(vars=vars(everything())))
 ```
 
 Positive correlation exhibits as parallel segments.
@@ -233,9 +248,8 @@ Negative correlation has crossing. The stronger the negative correlation the sma
 
 
 ```{r,fig.width=6, fig.height=3, fig.align="center"}
-ggparcoord(bike, columns=match(c("casual","registered","cnt"),names(bike)),
-           groupColumn = "workingday",
-           alphaLines=.4)
+ggplot(bike, aes(color=workingday)) + geom_pcp(aes(vars=vars(casual,registered, cnt)), alpha=.4)
+
 ```
 
 In the above we see that there is a difference in the casual-registered association for workingday or not.
@@ -250,14 +264,33 @@ ggplot(data=bike, aes(x=casual, y=registered, color=workingday)) + geom_point()
 
 The same pattern was evident in the full bike data.
 
+Standard parallel coordinate plots require numeric variables. There are variants that have been defined for
+categorical variables.
+
+With `ggpcp` factor variables can be used as an axis variable:
+
+```{r,fig.width=6, fig.height=3, fig.align="center"}
+ggplot(bike, aes(vars=vars( workingday,casual,registered, cnt), color=workingday)) + 
+  geom_pcp(alpha=.4)
+
+ggplot(bike, aes(vars=vars( workingday,casual,registered, cnt), color=workingday)) + 
+   geom_pcp_box(boxwidth = 0.1, fill="grey70")+
+    geom_pcp(alpha=.4,boxwidth = 0.1)+
+   geom_pcp_text(boxwidth = 0.1)
+
+
+```
+
+Other variants of parallel coordinate plots for categorical data are in ggalluvial, ggparallel, but these are for
+factors only.
 
 ## Practice 3
 
-Using the `penguins` dataset, make this plot
+Using the `penguins` dataset, make a plot of  the four dimension variables, colored by species.
 
-```{r, fig.width=6, fig.height=5, fig.align="center", echo=F}
+```{r, fig.width=6, fig.height=5, fig.align="center", echo=F, eval=F}
 ggpairs(na.omit(penguins), mapping = aes(color = species),
-            columns=c(3:7),
+            columns=c(3:6),
   lower = list(continuous =  wrap("smooth", method="lm", se=F, alpha=.5)),
   diag = list(continuous = wrap("densityDiag", alpha=0.5 )))
 ```
@@ -266,25 +299,25 @@ Which pair of variables and species has the highest correlation?
 Can you find two variables with negative correlation, but positive correlation within each species?
 This is called Simpson's paradox.
 
-Using `ggparcoord`, plot all the numeric variables. Use species as color.
+Then make a parallel coordinate plot of the same four variables, with the same colouring scheme.
 
 Can you identify presence of positive and negative correlation?
 
+In this plot, how does the Gentoo species compare to the other two species?
+
+Finally, make a parallel coordinate plot of species, island, and body_mass_g, coloured by species.
+How many species are on each island?
 
 ```{r,fig.width=6, fig.height=3, fig.align="center", echo=F, eval=F}
 
+ggplot(penguins, aes(vars=vars(bill_length_mm:body_mass_g), color=species))+
+        geom_pcp(alpha=.4)
 
-ggparcoord(penguins, columns=which(sapply(penguins, is.numeric)),
-           groupColumn = "species",
-           alphaLines=.4)
 
-ggparcoord(penguins, columns=which(sapply(penguins, is.numeric)),
-           groupColumn = "island",
-           alphaLines=.4)
-
-ggparcoord(penguins, columns=which(sapply(penguins, is.numeric)),
-           groupColumn = "sex",
-           alphaLines=.4)
+ggplot(penguins, aes(vars=vars(species, island, starts_with("body")), color=species))+
+  geom_pcp_box(boxwidth = 0.1, fill="grey70")+
+  geom_pcp(alpha=.4,boxwidth = 0.1)+
+  geom_pcp_text(boxwidth = 0.1)
 
 ```
 
@@ -308,10 +341,10 @@ gg_miss_upset(m[,-c(22,20)])
 Check out the visualisations in `naniar` for more options, eg the vignette at <https://cran.r-project.org/web/packages/naniar/vignettes/naniar-visualisation.html>
 
 
-## Titanic case study
+## titanic case study
 
-There were 2201 people aboard the Titanic when it sank in 1912.
-A summary of the people on board and whether they survived or not is given in the Titanic dataset.
+There were 2201 people aboard the titanic when it sank in 1912.
+A summary of the people on board and whether they survived or not is given in the titanicanic dataset.
 
 Here are some images as it left its last port of call, Cobh.
 
@@ -332,21 +365,22 @@ This case study looks at 4 categorical variables simultaneously:
 
 First we look at the number of survivors by class
 ```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
-#Titanic  # a 4d array....
-tit <- as.data.frame(Titanic)
-head(tit)
-tit<- tit[c(17:32,1:16),]
+#titanicanic  # a 4d array....
+titanic <- as.data.frame(Titanic)
+head(titanic)
+titanic<- titanic[c(17:32,1:16),]
 
-ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
   geom_col() 
 ```
 
 and then the survival rates by class
 
 ```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
-ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
   geom_col(position="fill") 
 ```
+
 
 - There is a big difference in Survival rates across the classes.
 - First class passengers have the highest chance of survival, crew members the lowest. 
@@ -355,7 +389,7 @@ ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
 We can bring in gender with `facet_wrap`
 
 ```{r,  fig.width=5.5, fig.height=3, fig.align="center"}
-ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
   geom_col(position="fill") + 
   facet_wrap( ~ Sex) + ylab("Rate")
 ```
@@ -374,7 +408,7 @@ more men than women in crew class 87% gets very little weight.
 
 Finally, bringing in age
 ```{r,  fig.width=5.5, fig.height=4.5, fig.align="center"}
-ggplot(data = tit, aes(x = Class, y = Freq,fill=Survived)) +
+ggplot(data = titanic, aes(x = Class, y = Freq,fill=Survived)) +
   geom_col(position="fill") + 
   facet_wrap( ~ Age+ Sex) + ylab("Rate")
 ```
@@ -383,34 +417,38 @@ We can get some simplification by showing the survival rate, that is omit the re
 
 
 ```{r,  fig.width=4.5, fig.height=4.5, fig.align="center"}
-titR <- 
-tit %>%  group_by(Class, Sex,Age) %>%
+titanicR <- 
+titanic %>%  group_by(Class, Sex,Age) %>%
 summarise(died=Freq[2], survived=Freq[1], rate=survived/sum(Freq))
-titR
+titanicR
 
-ggplot(data = titR, aes(x = Class, y = rate)) +
+ggplot(data = titanicR, aes(x = Class, y = rate)) +
   geom_col(fill="lightblue") + 
   facet_wrap( ~ Age+ Sex) 
 
+
+  
+```
+
+One of the examples in the `ggpcp` vignette has a parallel coordinates version of this data:
+<https://github.com/yaweige/ggpcp>  
+
+
+```{r, echo=F, eval=T,  out.width="50%",fig.align='center', fig.show='hold'}
+knitr::include_graphics(c("figs/pcp.png"))
 ```
 
 ## Practice 4
 
 Explore the survival rates for the data `lusitania.csv` on <https://github.com/cbhurley/CRT2021vis>
-This is a tabulated version of the data, in the same format as `tit`. The complete dataset
+This is a tabulated version of the data, in the same format as `titanic`. The complete dataset
 is available on Kaggle.
 
 You can find out more about the shipwreck <https://en.wikipedia.org/wiki/RMS_Lusitania>
 
 
 
-## Recommended book
 
-"The plot", Jean Hanff Korelitz
-
-```{r, echo=F, eval=T, out.width="25%", fig.align='center'}
-knitr::include_graphics("figs/plot.png")
-```
 
 ```{r, echo=FALSE, eval=FALSE, purl=FALSE}
 knitr::purl("lect2.Rmd")

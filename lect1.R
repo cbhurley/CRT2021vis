@@ -14,6 +14,10 @@ library(palmerpenguins) # more data
 
 
 
+## ---- echo=F, eval=T, out.width="25%", fig.align='center'------------------------------------------------------------------
+knitr::include_graphics("figs/wainer.png")
+
+
 ## ---- getdata--------------------------------------------------------------------------------------------------------------
 
 glimpse(bike_sharing_daily)
@@ -134,7 +138,7 @@ ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
 
 
 ## ---- echo=F, eval=T, out.width="75%", fig.align='center'------------------------------------------------------------------
-knitr::include_graphics("aes.png")
+knitr::include_graphics("figs/aes.png")
 
 
 ## ----  fig.width=6.5, fig.height=3, fig.align="center"---------------------------------------------------------------------

@@ -97,6 +97,19 @@ par(op)
 
 ```
 
+Along the same lines is the Datasaurus dataset of Alberto Cairo, who constructs 12 pairwise plots
+sharing summary stats with a point plot of a dinosaur. See
+<https://www.autodesk.com/research/publications/same-stats-different-graphs>
+and  <https://cran.r-project.org/web/packages/datasauRus/vignettes/Datasaurus.html>
+
+
+## Recommended book
+
+
+```{r, echo=F, eval=T, out.width="25%", fig.align='center'}
+knitr::include_graphics("figs/wainer.png")
+```
+
 
 ## The data
 
