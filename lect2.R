@@ -94,7 +94,7 @@ ggpairs(bike, mapping = aes(color = yr),
 
 
 ## ---- eval=F---------------------------------------------------------------------------------------------------------------
-## # install.packages("devtools")
+## install.packages("devtools")
 ## remotes::install_github("yaweige/ggpcp", build_vignettes = TRUE)
 
 
@@ -115,12 +115,12 @@ ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
            groupColumn = "yr",scale="uniminmax")
 
 
-## ---- fig.width=6, fig.height=3, fig.align="center"------------------------------------------------------------------------
+## ---- fig.width=5, fig.height=3, fig.align="center"------------------------------------------------------------------------
 library(ggpcp)
 ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)))
 
 
-## ---- fig.width=6, fig.height=3, fig.align="center"------------------------------------------------------------------------
+## ---- fig.width=5, fig.height=3, fig.align="center"------------------------------------------------------------------------
 ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)), method="raw")
 
 

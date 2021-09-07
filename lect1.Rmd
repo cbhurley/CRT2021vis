@@ -1,6 +1,9 @@
 ---
 title: "Data visualisation in R"
-author: "Catherine Hurley"
+author:
+  - name: "Catherine Hurley"
+    affiliation: Maynooth University
+    email: catherine.hurley@mu.ie
 date: "7/9/2021"
 output:
   html_document:

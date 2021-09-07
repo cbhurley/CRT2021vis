@@ -1,7 +1,10 @@
 
 ---
 title: "Data visualisation in R"
-author: "Catherine Hurley"
+author:
+  - name: "Catherine Hurley"
+    affiliation: Maynooth University
+    email: catherine.hurley@mu.ie
 date: "7/9/2021"
 output:
   html_document:
@@ -184,7 +187,7 @@ These can be constructed with function `ggparcoord` from GGally.
 But, a newer package called `ggpcp` is better.
 
 ```{r, eval=F}
-# install.packages("devtools")
+install.packages("devtools")
 remotes::install_github("yaweige/ggpcp", build_vignettes = TRUE)
 ```
 
@@ -212,7 +215,7 @@ ggparcoord(bike[s,], columns=match(c("casual","registered","cnt"),names(bike)),
 
 This is how you create the parallel coordinate plot in `ggpcp`
 
-```{r, fig.width=6, fig.height=3, fig.align="center"}
+```{r, fig.width=5, fig.height=3, fig.align="center"}
 library(ggpcp)
 ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)))
 ```
@@ -222,7 +225,7 @@ Variables that are positively correlated will have parallel line segments, here 
 
 Other scaling options are available eg
 
-```{r, fig.width=6, fig.height=3, fig.align="center"}
+```{r, fig.width=5, fig.height=3, fig.align="center"}
 ggplot(bike[s,], aes(color=yr)) + geom_pcp(aes(vars=vars(casual,registered, cnt)), method="raw")
 
 ```
