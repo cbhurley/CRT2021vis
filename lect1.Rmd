@@ -177,11 +177,11 @@ table(bike$weathersit)
 In R, you can use base R (barplot, hist, plot). Here we will use ggplot2 functions.
 
 ggplot2 is an R package authored by Hadley Wickham for elegant graphics in R.
-Click on this link \url{https://ggplot2.tidyverse.org} for lots of information.
+Click on this link <https://ggplot2.tidyverse.org> for lots of information.
 
 
-Also check out he primer at
-\url{https://rstudio.cloud/learn/primers/3}
+Also check out the primer at
+<https://rstudio.cloud/learn/primers/3>
 
 You will find more references at the end of this document.
 
@@ -238,7 +238,7 @@ and switch to proportions with
 
 ```{r,  fig.width=4.5, fig.height=3, fig.align="center"}
 ggplot(data=bike, mapping= aes(x=weathersit, fill=yr)) + 
-  geom_bar( position="fill")
+  geom_bar(position="fill")
 ```
 
 `geom_col` is like `geom_bar`, except you have a y variable.
@@ -276,7 +276,7 @@ ggplot(data=bike, aes(x=temp, y=cnt, color=yr, shape=season)) +
 
 
 ```
-The plot with shape and colour works better when there is more separation between the froups.
+The plot with shape and colour works better when there is more separation between the groups.
 
 In the plot below, weekday is a numeric variable so it is mapped to shades of blue.
 This variable is better represented as a factor, which changes the ggplot.
@@ -402,7 +402,7 @@ ggplot(data=bike, aes(x=temp, y=cnt, color=yr)) +
 
 ## More on facets
 
-More than one variable can be added tp the facet wrap. For example, you could use
+More than one variable can be added to the facet wrap. For example, you could use
 `facet_wrap(~ season+ yr)`,
 or even better `facet_grid`
 
@@ -482,14 +482,14 @@ with `geom_density`
 
 Here we compare the histogram and density
 
-```{r, fig.width=3.5, fig.height=3, fig.align="center", eval=F}
+```{r, fig.width=3.5, fig.height=3, fig.align="center", eval=T}
 ggplot(data=bike, aes(x=cnt)) + 
   geom_density(color="red")+
   geom_histogram(aes(y=after_stat(density)),fill="lightblue", color="navy", alpha=.5)
 ```
 
 If you use a fill aesthetic for the density you get
-```{r, fig.width=4.5, fig.height=3, fig.align="center", eval=F}
+```{r, fig.width=4.5, fig.height=3, fig.align="center", eval=T}
 ggplot(data=bike, aes(x=cnt, fill=yr)) + 
   geom_density(alpha=.5)
 ```
@@ -505,7 +505,7 @@ ggplot(data=bike, aes(y=cnt,x=season)) +
 
 If you do not need an x variable use:
 
-```{r, fig.width=3.5, fig.height=3, fig.align="center", eval=F}
+```{r, fig.width=3.5, fig.height=3, fig.align="center", eval=T}
 ggplot(data=bike, aes(y=cnt), x=0) + # any number will do
   geom_boxplot()  
 ```

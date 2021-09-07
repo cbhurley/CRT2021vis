@@ -75,7 +75,7 @@ ggplot(data=bike, mapping= aes(x=weathersit, fill=yr)) +
 
 ## ----  fig.width=4.5, fig.height=3, fig.align="center"---------------------------------------------------------------------
 ggplot(data=bike, mapping= aes(x=weathersit, fill=yr)) + 
-  geom_bar( position="fill")
+  geom_bar(position="fill")
 
 
 ## ----  fig.width=4.5, fig.height=3, fig.align="center"---------------------------------------------------------------------
@@ -214,15 +214,15 @@ ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm, color=sex)) +
   scale_colour_discrete(na.translate = FALSE)
 
 
-## ---- fig.width=3.5, fig.height=3, fig.align="center", eval=F--------------------------------------------------------------
-## ggplot(data=bike, aes(x=cnt)) +
-##   geom_density(color="red")+
-##   geom_histogram(aes(y=after_stat(density)),fill="lightblue", color="navy", alpha=.5)
+## ---- fig.width=3.5, fig.height=3, fig.align="center", eval=T--------------------------------------------------------------
+ggplot(data=bike, aes(x=cnt)) + 
+  geom_density(color="red")+
+  geom_histogram(aes(y=after_stat(density)),fill="lightblue", color="navy", alpha=.5)
 
 
-## ---- fig.width=4.5, fig.height=3, fig.align="center", eval=F--------------------------------------------------------------
-## ggplot(data=bike, aes(x=cnt, fill=yr)) +
-##   geom_density(alpha=.5)
+## ---- fig.width=4.5, fig.height=3, fig.align="center", eval=T--------------------------------------------------------------
+ggplot(data=bike, aes(x=cnt, fill=yr)) + 
+  geom_density(alpha=.5)
 
 
 ## ---- fig.width=4.5, fig.height=3, fig.align="center"----------------------------------------------------------------------
@@ -230,9 +230,9 @@ ggplot(data=bike, aes(y=cnt,x=season)) +
   geom_boxplot(varwidth=TRUE) # width of box proportional to sqrt of nobs
 
 
-## ---- fig.width=3.5, fig.height=3, fig.align="center", eval=F--------------------------------------------------------------
-## ggplot(data=bike, aes(y=cnt), x=0) + # any number will do
-##   geom_boxplot()
+## ---- fig.width=3.5, fig.height=3, fig.align="center", eval=T--------------------------------------------------------------
+ggplot(data=bike, aes(y=cnt), x=0) + # any number will do
+  geom_boxplot()  
 
 
 ## ---- fig.width=4.5, fig.height=3, fig.align="center"----------------------------------------------------------------------
